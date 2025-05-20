@@ -1,0 +1,13 @@
+[SIZES]
+A0 = [3370, 2384, "@A0"]
+A1 = [2384, 1684, "@A1"]
+A2 = [1684, 1191, "@A2"]
+A3 = [1191, 842, "@A3"]
+A4 = [595, 842, "@A4"]
+
+[OPTIONS]
+handleBomFiles = false
+
+[FOLDER_NAMES]
+unknownSize = "@manuelSortingRequired"
+bom = "@BOMs"
