@@ -22,6 +22,11 @@ def pickFolder():
     Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
     return filedialog.askdirectory() # show an 'Open' dialog box and return the path to the selected file
 
+def areListsEqualWithError(list1, list2, tolerance):
+    for i1, i2 in zip(list1, list2):
+        if (abs(i1-i2) > tolerance): return False
+    return True
+
 def copyFiles(sourceFolderPathObject):
     for file in list(sourceFolderPathObject.glob('*.pdf')):
         fileName = file.name
@@ -30,7 +35,7 @@ def copyFiles(sourceFolderPathObject):
             reader = PdfReader(file)
 
             if (handleBOMs):
-                if ('.bom.' in fileName or '.bomall.' in fileName):
+                if ('.bom.' in fileName or '.bomall.' in fileName or '.bomstrc.' in fileName):
                     dest = sourceFolderPathObject.joinpath(folderNameBOM)
                     Path(dest).mkdir(exist_ok = True)
                     shutil.copy2(file, dest)
@@ -63,7 +68,7 @@ def copyFiles(sourceFolderPathObject):
             # page sizes are different
             if (not differentSizes):
                 for sizePreset in dictSizes.values():
-                    if (size == [sizePreset[0], sizePreset[1]]):
+                    if (areListsEqualWithError(size, [sizePreset[0], sizePreset[1]], sizeTolerance)):
                         dest = sourceFolderPathObject.joinpath(sizePreset[2])
                         Path(dest).mkdir(exist_ok = True)
                         shutil.copy2(file, dest)
@@ -100,6 +105,7 @@ if (__name__ == '__main__'):
             folderNameUnknown = data['FOLDER_NAMES']['unknownSize']
             folderNameBOM = data['FOLDER_NAMES']['bom']
             handleBOMs = data['OPTIONS']['handleBomFiles']
+            sizeTolerance = data['OPTIONS']['sizeTolerance']
 
             sourceFolderPathObject = Path(sourceFolderPath)
             copyFiles(sourceFolderPathObject)

@@ -7,6 +7,7 @@ A4 = [595, 842, "@A4"]
 
 [OPTIONS]
 handleBomFiles = true
+sizeTolerance = 10
 
 [FOLDER_NAMES]
 unknownSize = "@manuelSortingRequired"
