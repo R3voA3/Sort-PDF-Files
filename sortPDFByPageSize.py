@@ -32,9 +32,9 @@ def copyFiles(sourceFolderPathObject):
             if (handleBOMs):
                 if ('.bom.' in fileName or '.bomall.' in fileName):
                     dest = sourceFolderPathObject.joinpath(folderNameBOM)
-                    if (not Path(dest).is_file()):
-                        shutil.copy2(file, dest)
-                        print(f'{fileName} was moved to {dest}.')
+                    Path(dest).mkdir(exist_ok = True)
+                    shutil.copy2(file, dest)
+                    print(f'{fileName} was moved to {dest}.')
                     continue
 
             size = [-1, -1]

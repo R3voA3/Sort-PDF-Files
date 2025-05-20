@@ -6,7 +6,7 @@ A3 = [1191, 842, "@A3"]
 A4 = [595, 842, "@A4"]
 
 [OPTIONS]
-handleBomFiles = false
+handleBomFiles = true
 
 [FOLDER_NAMES]
 unknownSize = "@manuelSortingRequired"
