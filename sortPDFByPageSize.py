@@ -1,6 +1,5 @@
 from pathlib import Path
 from pypdf import PdfReader
-from tkinter import Tk
 from tkinter import filedialog
 from tkinter import messagebox
 
