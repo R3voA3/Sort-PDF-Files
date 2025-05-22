@@ -14,7 +14,7 @@ handleBomFiles = true
 # Size tolerance. Page width/height can be +-10 this value to still be recognized as for example A4
 sizeTolerance = 10
 # Folder name for pdf files that don't match any size or have different page sizes
-# unknownSize = "@manuelSortingRequired"
+unknownSize = "@manuelSortingRequired"
 # Folder name for bom files, see handleBomFiles
 bom = "@BOMs"
 # Sets wether to move or copy files
