@@ -7,6 +7,7 @@ import tkinter
 import shutil
 import tomllib
 import logging
+import re
 
 def moveOrCopyFile(strSourceFile, bMoveFile, strTargetFolderName, strRoot):
     strTargetFolder = Path(strRoot).joinpath(strTargetFolderName)
@@ -50,10 +51,20 @@ def iterateFiles(strRoot):
         strFileName = oFile.name
 
         try:
-            if (bHandleBOMs):
-                if ('.bom.' in strFileName or '.bomall.' in strFileName or '.bomstrc.' in strFileName):
-                    moveOrCopyFile(oFile.__str__(), bMoveFiles, strFolderNameBOM, strRoot)
-                    continue
+            # Handle special files
+            if (not dictSpecialFiles == None):
+                for key in dictSpecialFiles.keys():
+
+                    value = dictSpecialFiles.get(key)
+                    pattern = value[0]
+                    folderName = value[1]
+
+                    if (pattern == '' or folderName == ''):
+                        continue
+
+                    if (re.search(pattern, strFileName)):
+                        moveOrCopyFile(oFile.__str__(), bMoveFiles, folderName, strRoot)
+                        break
 
             aSize = [-1, -1]
             bDifferentSizes = False
@@ -122,14 +133,14 @@ if (__name__ == '__main__'):
         oLog.error('config.toml does not contain options. Program aborted!')
         exit()
 
+    dictSpecialFiles = {}
+    dictSpecialFiles = data.get('SPECIAL_FILES')
     dictSizes = data.get('SIZES')
     dictOptions = data.get('OPTIONS')
 
     # Use default values if not defined in config.toml
-    bHandleBOMs = dictOptions.get('handleBomFiles', True)
     bMoveFiles = dictOptions.get('moveFiles', False)
     iSizeTolerance = dictOptions.get('sizeTolerance', 10)
-    strFolderNameBOM = dictOptions.get('bom', "@BOMs")
     strFolderNameUnknown = dictOptions.get('unknownSize', "@manuelSortingRequired")
 
     strRoot = pickFolder()
