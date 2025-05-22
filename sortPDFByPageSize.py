@@ -106,7 +106,7 @@ if (__name__ == '__main__'):
         exit()
 
     # Load config.toml
-    with open("config.toml", "rb") as f:
+    with open('config.toml', 'rb') as f:
         data = tomllib.load(f)
 
     # Check for valid config.toml
@@ -130,7 +130,7 @@ if (__name__ == '__main__'):
     # Use default values if not defined in config.toml
     bMoveFiles = dictOptions.get('moveFiles', False)
     iSizeTolerance = dictOptions.get('sizeTolerance', 10)
-    strFolderNameUnknown = dictOptions.get('unknownSize', "@manuelSortingRequired")
+    strFolderNameUnknown = dictOptions.get('unknownSize', '@manuelSortingRequired')
 
     strRoot = pickFolder()
 
