@@ -1,10 +1,30 @@
+
 from pathlib import Path
 from pypdf import PdfReader
 from tkinter import filedialog
 from tkinter import messagebox
 
+import tkinter
 import shutil
 import tomllib
+import logging
+
+def moveOrCopyFile(strSourceFile, bMoveFile, strTargetFolderName, strRoot):
+    strTargetFolder = Path(strRoot).joinpath(strTargetFolderName)
+    Path(strTargetFolder).mkdir(exist_ok = True)
+
+    if (bMoveFile):
+        targetFile = Path(strTargetFolder).joinpath(Path(strSourceFile).name)
+        targetFileExists = targetFile.exists()
+
+        if (targetFileExists):
+            oLog.warning(f'{targetFile} already exists! File was not moved!')
+        else:
+            shutil.move(strSourceFile, strTargetFolder)
+            oLog.info(f'{strSourceFile} was moved to {strTargetFolder}!')
+    else:
+        shutil.copy2(strSourceFile, strTargetFolder)
+        oLog.info(f'{strSourceFile} was moved to {strTargetFolder}!')
 
 def getSizes():
     with open("config.toml", "rb") as f:
@@ -12,103 +32,103 @@ def getSizes():
 
     dictSizes = dict()
 
-    for size in data.get('SIZES'):
-        dictSizes[size] = data['SIZES'][size]
+    for aSize in data.get('SIZES'):
+        dictSizes[aSize] = data['SIZES'][aSize]
 
     return dictSizes
 
 def pickFolder():
-    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-    return filedialog.askdirectory() # show an 'Open' dialog box and return the path to the selected file
+    tkinter.Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    return filedialog.askdirectory() # show an 'Open' dialog box and return the path to the selected oFile
 
-def areListsEqualWithError(list1, list2, tolerance):
-    for i1, i2 in zip(list1, list2):
-        if (abs(i1-i2) > tolerance): return False
+def areListsEqualWithError(lList1, lList2, iTolerance):
+    for i1, i2 in zip(lList1, lList2):
+        if (abs(i1-i2) > iTolerance): return False
     return True
 
-def copyFiles(sourceFolderPathObject):
-    for file in list(sourceFolderPathObject.glob('*.pdf')):
-        fileName = file.name
+def iterateFiles(strRoot):
+    for oFile in list(Path(strRoot).glob('*.pdf')):
+        strFileName = oFile.name
 
-        try:
-            reader = PdfReader(file)
+    # try:
+        if (bHandleBOMs):
+            if ('.bom.' in strFileName or '.bomall.' in strFileName or '.bomstrc.' in strFileName):
+                moveOrCopyFile(oFile.__str__(), bMoveFiles, strFolderNameBOM, strRoot)
+                continue
 
-            if (handleBOMs):
-                if ('.bom.' in fileName or '.bomall.' in fileName or '.bomstrc.' in fileName):
-                    dest = sourceFolderPathObject.joinpath(folderNameBOM)
-                    Path(dest).mkdir(exist_ok = True)
-                    shutil.copy2(file, dest)
-                    print(f'{fileName} was moved to {dest}.')
+        aSize = [-1, -1]
+        bDifferentSizes = False
+
+        for page in PdfReader(oFile).pages:
+            boundingBox = page.trimbox
+            iWidth = round(boundingBox.width)
+            iHeight = round(boundingBox.height)
+
+            # Set aSize initially
+            if (aSize[0] == -1 or aSize[1] == -1):
+                aSize[0] = iWidth
+                aSize[1] = iHeight
+            else:
+                # If new iWidth and iHeight are different
+                # from previous iWidth and iHeight
+                # then pages don't have the same aSize
+                if (aSize[0] != iWidth or aSize[1] != iHeight):
+                    bDifferentSizes = True
                     continue
 
-            size = [-1, -1]
-            differentSizes = False
+        bFileHandled = False
 
-            for page in reader.pages:
-                boundingBox = page.trimbox
-                width = round(boundingBox.width)
-                height = round(boundingBox.height)
+        # Move files to strFolderNameUnknown folder if
+        # page sizes are different
+        if (not bDifferentSizes):
+            for aSizePreset in dictSizes.values():
+                if (areListsEqualWithError(aSize, [aSizePreset[0], aSizePreset[1]], iSizeTolerance)):
+                    moveOrCopyFile(oFile.__str__(), bMoveFiles, aSizePreset[2], strRoot)
+                    bFileHandled = True
+                    break
 
-                # Set size initially
-                if (size[0] == -1 or size[1] == -1):
-                    size[0] = width
-                    size[1] = height
-                else:
-                    # If new width and height are different
-                    # from previous width and height
-                    # then pages don't have the same size
-                    if (size[0] != width or size[1] != height):
-                        differentSizes = True
-                        continue
-
-            moved = False
-
-            # Move files to folderNameUnknown folder if
-            # page sizes are different
-            if (not differentSizes):
-                for sizePreset in dictSizes.values():
-                    if (areListsEqualWithError(size, [sizePreset[0], sizePreset[1]], sizeTolerance)):
-                        dest = sourceFolderPathObject.joinpath(sizePreset[2])
-                        Path(dest).mkdir(exist_ok = True)
-                        shutil.copy2(file, dest)
-                        print(f'{fileName} was moved to {dest}.')
-                        moved = True
-                        break
-
-            if (differentSizes or not moved):
-                dest = sourceFolderPathObject.joinpath(folderNameUnknown)
-                Path(dest).mkdir(exist_ok = True)
-                shutil.copy2(file, dest)
-                print(f'{fileName} was moved to {dest}.')
-                moved = True
-                continue
-        except:
-            print(f'{fileName} could not be opened!')
+        if (bDifferentSizes or not bFileHandled):
+            moveOrCopyFile(oFile.__str__(), bMoveFiles, strFolderNameUnknown, strRoot)
+            bFileHandled = True
+            continue
+    # except:
+        oLog.error(f'{strFileName} could not be opened!'),
 
 if (__name__ == '__main__'):
-    sourceFolderPath = pickFolder()
 
-    if (sourceFolderPath != ''):
-        result = messagebox.askquestion('Check path', f'Are you sure you want to use this path? <{sourceFolderPath}>')
+    oLog = logging.getLogger(__name__)
+    logging.basicConfig(filename='logfile.log', level=logging.INFO)
 
-        if (result ==  'yes'):
+    if (not Path('config.toml').exists()):
+        messagebox.showerror('config.toml not found',
+                             'The configuration oFile config.toml is missing! Program aborted!')
+        oLog.error('The configuration oFile config.toml is missing! Program aborted!')
+        exit()
+
+    strRoot = pickFolder()
+
+    if (strRoot != ''):
+        strResult = messagebox.askquestion('Check path',
+                                        f'Are you sure you want to use this path? {strRoot}')
+
+        if (strResult == 'yes'):
             # Store settings globally
             with open("config.toml", "rb") as f:
                 data = tomllib.load(f)
 
             dictSizes = dict()
 
-            for size in data.get('SIZES'):
-                dictSizes[size] = data['SIZES'][size]
+            for aSize in data.get('SIZES'):
+                dictSizes[aSize] = data['SIZES'][aSize]
 
-            folderNameUnknown = data['FOLDER_NAMES']['unknownSize']
-            folderNameBOM = data['FOLDER_NAMES']['bom']
-            handleBOMs = data['OPTIONS']['handleBomFiles']
-            sizeTolerance = data['OPTIONS']['sizeTolerance']
+            strFolderNameUnknown = data['OPTIONS']['unknownSize']
+            strFolderNameBOM = data['OPTIONS']['bom']
+            bHandleBOMs = data['OPTIONS']['handleBomFiles']
+            iSizeTolerance = data['OPTIONS']['sizeTolerance']
+            bMoveFiles = data['OPTIONS']['move']
 
-            sourceFolderPathObject = Path(sourceFolderPath)
-            copyFiles(sourceFolderPathObject)
+            iterateFiles(strRoot)
         else:
-            print('Copy operation aborted!')
+            oLog.info('Copy operation aborted!')
     else:
-        print('Copy operation canceled. Not valid folder was selected!')
+        oLog.info('Copy operation canceled. Not valid folder was selected!')
