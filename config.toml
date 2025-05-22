@@ -1,4 +1,5 @@
 [SIZES]
+# Sheet sizes in format [width, height, folderNameToCopyInto]
 A0 = [3370, 2384, "@A0"]
 A1 = [2384, 1684, "@A1"]
 A2 = [1684, 1191, "@A2"]
@@ -7,9 +8,14 @@ A4 = [595, 842, "@A4"]
 A4LandScape = [842, 595, "@A4"]
 
 [OPTIONS]
+# Special handling for files containing .bom., .bomall. or .bomstrc in their name
+# if false these files will be skipped
 handleBomFiles = true
+# Size tolerance. Page width/height can be +-10 this value to still be recognized as for example A4
 sizeTolerance = 10
-
-[FOLDER_NAMES]
+# Folder name for pdf files that don't match any size or have different page sizes
 unknownSize = "@manuelSortingRequired"
+# Folder name for bom files, see handleBomFiles
 bom = "@BOMs"
+# Sets wether to move or copy files
+move = true
