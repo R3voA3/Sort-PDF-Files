@@ -26,17 +26,6 @@ def moveOrCopyFile(strSourceFile, bMoveFile, strTargetFolderName, strRoot):
         shutil.copy2(strSourceFile, strTargetFolder)
         oLog.info(f'{strSourceFile} was moved to {strTargetFolder}!')
 
-def getSizes():
-    with open("config.toml", "rb") as f:
-        data = tomllib.load(f)
-
-    dictSizes = dict()
-
-    for aSize in data.get('SIZES'):
-        dictSizes[aSize] = data['SIZES'][aSize]
-
-    return dictSizes
-
 def pickFolder():
     tkinter.Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
     return filedialog.askdirectory() # show an 'Open' dialog box and return the path to the selected oFile
@@ -133,7 +122,7 @@ if (__name__ == '__main__'):
         oLog.error('config.toml does not contain options. Program aborted!')
         exit()
 
-    dictSpecialFiles = {}
+    # dictSpecialFiles = {}
     dictSpecialFiles = data.get('SPECIAL_FILES')
     dictSizes = data.get('SIZES')
     dictOptions = data.get('OPTIONS')
@@ -146,7 +135,7 @@ if (__name__ == '__main__'):
     strRoot = pickFolder()
 
     if (strRoot != ''):
-        strResult = messagebox.askquestion('Check path',
+        strResult = messagebox.askquestion('Check Path',
                                         f'Are you sure you want to use this path? {strRoot}')
 
         if (strResult == 'yes'):
