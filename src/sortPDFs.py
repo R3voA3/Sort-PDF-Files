@@ -1,13 +1,15 @@
-from pathlib import Path
-from pypdf import PdfReader
-from tkinter import filedialog
-from tkinter import messagebox
-
 import tkinter
 import shutil
 import tomllib
 import logging
 import re
+import sys
+
+from pathlib import Path
+from tkinter import filedialog
+from tkinter import messagebox
+from pypdf import PdfReader
+
 
 def moveOrCopyFile(strSourceFile, bMoveFile, strTargetFolderName, strRoot):
     strTargetFolder = Path(strRoot).joinpath(strTargetFolderName)
@@ -18,13 +20,13 @@ def moveOrCopyFile(strSourceFile, bMoveFile, strTargetFolderName, strRoot):
         targetFileExists = targetFile.exists()
 
         if (targetFileExists):
-            oLog.warning(f'{targetFile} already exists! File was not moved')
+            oLog.warning('%s already exists! File was not moved', targetFile)
         else:
             shutil.move(strSourceFile, strTargetFolder)
-            oLog.info(f'{strSourceFile} was moved to {strTargetFolder}')
+            oLog.info('%s was moved to %s', strSourceFile, strTargetFolder)
     else:
         shutil.copy2(strSourceFile, strTargetFolder)
-        oLog.info(f'{strSourceFile} was moved to {strTargetFolder}')
+        oLog.info('%s was moved to %s', strSourceFile, strTargetFolder)
 
 def pickFolder():
     # we don't want a full GUI, so keep the root window from appearing
@@ -44,7 +46,7 @@ def iterateFiles(strRoot):
 
         try:
             # Handle special files
-            if (not dictSpecialFiles == None):
+            if (not dictSpecialFiles is None):
                 for key in dictSpecialFiles.keys():
 
                     value = dictSpecialFiles.get(key)
@@ -55,7 +57,7 @@ def iterateFiles(strRoot):
                         continue
 
                     if (re.search(pattern, strFileName)):
-                        moveOrCopyFile(oFile.__str__(), bMoveFiles, folderName, strRoot)
+                        moveOrCopyFile(oFile, bMoveFiles, folderName, strRoot)
                         break
 
             aSize = [-1, -1]
@@ -85,16 +87,16 @@ def iterateFiles(strRoot):
             if (not bDifferentSizes):
                 for aSizePreset in dictSizes.values():
                     if (areListsEqualWithError(aSize, [aSizePreset[0], aSizePreset[1]], iSizeTolerance)):
-                        moveOrCopyFile(oFile.__str__(), bMoveFiles, aSizePreset[2], strRoot)
+                        moveOrCopyFile(oFile, bMoveFiles, aSizePreset[2], strRoot)
                         bFileHandled = True
                         break
 
             if (bDifferentSizes or not bFileHandled):
-                moveOrCopyFile(oFile.__str__(), bMoveFiles, strFolderNameUnknown, strRoot)
+                moveOrCopyFile(oFile, bMoveFiles, strFolderNameUnknown, strRoot)
                 bFileHandled = True
                 continue
         except:
-            oLog.error(f'{strFileName} could not be opened'),
+            oLog.error('%s could not be opened', strFileName),
 
 if (__name__ == '__main__'):
 
@@ -106,7 +108,7 @@ if (__name__ == '__main__'):
         messagebox.showerror('config.toml not found',
                              'The configuration oFile config.toml is missing! Program aborted!')
         oLog.error('The configuration oFile config.toml is missing! Program aborted')
-        exit()
+        sys.exit()
 
     # Load config.toml
     with open('config.toml', 'rb') as f:
@@ -117,13 +119,13 @@ if (__name__ == '__main__'):
         messagebox.showerror('SIZES not found',
                         'config.toml does not contain sizes. Program aborted!')
         oLog.error('config.toml does not contain sizes. Program aborted')
-        exit()
+        sys.exit()
 
     if (data.get('OPTIONS') == None):
         messagebox.showerror('OPTIONS not found',
                         'config.toml does not contain options. Program aborted!')
         oLog.error('config.toml does not contain options. Program aborted')
-        exit()
+        sys.exit()
 
     # dictSpecialFiles = {}
     dictSpecialFiles = data.get('SPECIAL_FILES')
@@ -139,7 +141,7 @@ if (__name__ == '__main__'):
 
     if (strRoot != ''):
         strResult = messagebox.askquestion('Check Path',
-                                        f'Are you sure you want to use this path? {strRoot}')
+                                        'Are you sure you want to use this path? %s', strRoot)
 
         if (strResult == 'yes'):
             iterateFiles(strRoot)
