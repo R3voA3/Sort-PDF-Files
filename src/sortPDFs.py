@@ -1,3 +1,9 @@
+"""
+Sorts pdf files in given folder by their sheet size.
+Pdf files can also be sorted in custom folder if their name matches a pattern.
+See config.toml for settings and to add custom sizes.
+"""
+
 import tkinter
 import shutil
 import tomllib
@@ -11,9 +17,9 @@ from tkinter import messagebox
 from pypdf import PdfReader
 
 
-def move_or_copy_file(source_file, move_file, target_folder_name, root):
+def move_or_copy_file(source_file, move_file, target_folder_name, root_folder):
     """Moves or copies given file"""
-    target_folder = Path(root).joinpath(target_folder_name)
+    target_folder = Path(root_folder).joinpath(target_folder_name)
     Path(target_folder).mkdir(exist_ok = True)
 
     if move_file:
@@ -44,9 +50,9 @@ def are_lists_equal_with_tolerance(list_a, list_b, tolerance):
             return False
     return True
 
-def iterate_files(root):
+def iterate_files(root_folder):
     """Loops over all pdf files in given folder and moves them if appropriate"""
-    for file in list(Path(root).glob('*.pdf')):
+    for file in list(Path(root_folder).glob('*.pdf')):
         file_name = file.name
 
         try:
@@ -62,7 +68,7 @@ def iterate_files(root):
                         continue
 
                     if re.search(pattern, file_name):
-                        move_or_copy_file(file, move_files, folder_name, root)
+                        move_or_copy_file(file, move_files, folder_name, root_folder)
                         break
 
             arr_size = [-1, -1]
@@ -93,12 +99,12 @@ def iterate_files(root):
                 for arr_size_preset in dict_sizes.values():
                     if are_lists_equal_with_tolerance \
                     (arr_size, [arr_size_preset[0], arr_size_preset[1]], size_tolerance):
-                        move_or_copy_file(file, move_files, arr_size_preset[2], root)
+                        move_or_copy_file(file, move_files, arr_size_preset[2], root_folder)
                         file_handled = True
                         break
 
             if (different_sizes or not file_handled):
-                move_or_copy_file(file, move_files, folder_name_unknown, root)
+                move_or_copy_file(file, move_files, folder_name_unknown, root_folder)
                 file_handled = True
                 continue
         except Exception:
