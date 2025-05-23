@@ -101,7 +101,7 @@ def iterate_files(root):
                 move_or_copy_file(file, move_files, folder_name_unknown, root)
                 file_handled = True
                 continue
-        except:
+        except Exception:
             oLog.error('%s could not be opened', file_name),
 
 if __name__ == '__main__':
