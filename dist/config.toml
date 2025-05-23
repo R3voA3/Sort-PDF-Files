@@ -1,0 +1,24 @@
+[SIZES]
+# Sheet sizes in format [width, height, folderNameToCopyInto]
+A0 = [3370, 2384, "A0"]
+A1 = [2384, 1684, "A1"]
+A2 = [1684, 1191, "A2"]
+A3 = [1191, 842, "A3"]
+A4 = [595, 842, "A4"]
+A4LandScape = [842, 595, "A4_Quer"]
+
+[SPECIAL_FILES]
+# If the file name contains one of these they are moved into the folder with given name
+# Format ["regExPattern", "folderNameToCopyInto"]
+# Unlimited patterns can be added
+s1 = [".bomstrc.", "Strukturstücklisten"]
+s2 = [".bomall.", "Summenstücklisten"]
+s3 = [".bom.", "Stücklisten"]
+
+[OPTIONS]
+# Size tolerance. Page width/height can be +-10 this value to still be recognized as for example A4
+sizeTolerance = 10
+# Folder name for pdf files that don't match any size or have different page sizes
+unknownSize = "ManuellSortieren"
+# Sets wether to move or copy files
+moveFiles = false
