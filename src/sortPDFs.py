@@ -17,6 +17,10 @@ from tkinter import filedialog
 from tkinter import messagebox
 from pypdf import PdfReader
 
+
+class FileOperationError(Exception):
+    """A file operation failed."""
+
 def module_path():
     """ This will get us the program's directory,
     even if we are frozen using py2exe"""
@@ -116,8 +120,8 @@ def iterate_files(root_folder):
                 move_or_copy_file(file, move_files, folder_name_unknown, root_folder)
                 file_handled = True
                 continue
-        except Exception:
-            oLog.error('%s could not be opened', file_name),
+        except FileOperationError:
+            oLog.error('%s could not be opened', file_name)
 
 if __name__ == '__main__':
     module_location = module_path()
