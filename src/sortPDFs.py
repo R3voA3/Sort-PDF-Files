@@ -10,12 +10,21 @@ import tomllib
 import logging
 import re
 import sys
+import os
 
 from pathlib import Path
 from tkinter import filedialog
 from tkinter import messagebox
 from pypdf import PdfReader
 
+def module_path():
+    """ This will get us the program's directory,
+    even if we are frozen using py2exe"""
+
+    if hasattr(sys, "frozen"):
+        return os.path.dirname(sys.executable)
+
+    return os.path.dirname(__file__)
 
 def move_or_copy_file(source_file, move_file, target_folder_name, root_folder):
     """Moves or copies given file"""
@@ -111,12 +120,13 @@ def iterate_files(root_folder):
             oLog.error('%s could not be opened', file_name),
 
 if __name__ == '__main__':
+    module_location = module_path()
 
     oLog = logging.getLogger(__name__)
-    logging.basicConfig(filename=Path(__file__).parent.joinpath('logfile.log'),
+    logging.basicConfig(filename=Path(str(module_location)).joinpath('logfile.log'),
                         level=logging.INFO, encoding='UTF-8')
 
-    path_to_config = Path(__file__).parent.joinpath('config.toml')
+    path_to_config = Path(str(module_location)).joinpath('config.toml')
 
     # Check if config.toml exists
     if not Path(path_to_config).exists():
@@ -142,7 +152,6 @@ if __name__ == '__main__':
         oLog.error('config.toml does not contain options. Program aborted')
         sys.exit()
 
-    # dict_special_files = {}
     dict_special_files = data.get('SPECIAL_FILES')
     dict_sizes = data.get('SIZES')
     dictOptions = data.get('OPTIONS')
@@ -156,7 +165,7 @@ if __name__ == '__main__':
 
     if root != '':
         RESULT = messagebox.askquestion('Check Path',
-                                        ('Are you sure you want to use this path? %s', root))
+                                        f'Are you sure you want to use this path? {root}')
 
         if RESULT == 'yes':
             iterate_files(root)
