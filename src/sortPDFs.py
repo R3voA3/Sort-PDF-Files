@@ -40,7 +40,7 @@ def move_or_copy_file(source_file, move_file, target_folder_name, root_folder):
         target_file_exists = target_file.exists()
 
         if target_file_exists:
-            oLog.warning('%s already exists! File was not moved', target_file)
+            oLog.warning('%s already exists! File was not moved', target_file) # pylint: disable=possibly-used-before-assignment
         else:
             shutil.move(source_file, target_folder)
             oLog.info('%s was moved to %s', source_file, target_folder)
@@ -70,7 +70,7 @@ def iterate_files(root_folder):
 
         try:
             # Handle special files
-            if not dict_special_files is None:
+            if not dict_special_files is None: # pylint: disable=possibly-used-before-assignment
                 for key in dict_special_files.keys():
 
                     value = dict_special_files.get(key)
@@ -81,7 +81,7 @@ def iterate_files(root_folder):
                         continue
 
                     if re.search(pattern, file_name):
-                        move_or_copy_file(file, move_files, folder_name, root_folder)
+                        move_or_copy_file(file, move_files, folder_name, root_folder) # pylint: disable=possibly-used-before-assignment
                         break
 
             arr_size = [-1, -1]
@@ -109,15 +109,17 @@ def iterate_files(root_folder):
             # Move files to folder_name_unknown folder if
             # page sizes are different
             if not different_sizes:
-                for arr_size_preset in dict_sizes.values():
-                    if are_lists_equal_with_tolerance \
-                    (arr_size, [arr_size_preset[0], arr_size_preset[1]], size_tolerance):
+                for arr_size_preset in dict_sizes.values(): # pylint: disable=possibly-used-before-assignment
+                    if are_lists_equal_with_tolerance (arr_size,
+                                                       [arr_size_preset[0],
+                                                        arr_size_preset[1]],
+                                                        size_tolerance): # pylint: disable=possibly-used-before-assignment
                         move_or_copy_file(file, move_files, arr_size_preset[2], root_folder)
                         file_handled = True
                         break
 
             if (different_sizes or not file_handled):
-                move_or_copy_file(file, move_files, folder_name_unknown, root_folder)
+                move_or_copy_file(file, move_files, folder_name_unknown, root_folder) # pylint: disable=possibly-used-before-assignment
                 file_handled = True
                 continue
         except FileOperationError:
